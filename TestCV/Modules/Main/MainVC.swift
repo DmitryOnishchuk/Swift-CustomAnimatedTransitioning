@@ -104,8 +104,6 @@ extension MainVC: UICollectionViewDataSource, UICollectionViewDelegate, UICollec
         tr.prepareViewForCustomTransition(fromViewController: self, bottomTriggerView: cell!.contentView, textForDetailVC: "Test")
         
         transitions.updateValue(tr, forKey: currentPageIndex)
-        
-        updateViewState(isCardsContentAvailable: !places.isEmpty)
     }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
