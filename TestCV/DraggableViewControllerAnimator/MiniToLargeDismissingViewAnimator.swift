@@ -10,11 +10,13 @@ import UIKit
 
 class MiniToLargeDismissingViewAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     let duration: TimeInterval
-    let initialY: CGFloat
+    let doneY: CGFloat
+    let toViewWidth: CGFloat
     
-    init(duration: TimeInterval = 0.4, initialY: CGFloat) {
+    init(duration: TimeInterval = 0.4, doneY: CGFloat, toViewWidth:CGFloat) {
         self.duration = duration
-        self.initialY = initialY
+        self.doneY = doneY
+        self.toViewWidth = toViewWidth
     }
     
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
@@ -23,16 +25,24 @@ class MiniToLargeDismissingViewAnimator: NSObject, UIViewControllerAnimatedTrans
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         guard let toVC = transitionContext.viewController(forKey: .to),
-            let fromVC = transitionContext.viewController(forKey: .from),
-            let animatableFromVC = fromVC as? MiniToLargeAnimatable else {
-            return
-        }
+              let fromVC = transitionContext.viewController(forKey: .from),
+              let animatableFromVC = fromVC as? MiniToLargeAnimatable else {
+                  return
+              }
         var fromVCRect = transitionContext.initialFrame(for: fromVC)
-        fromVCRect.origin.y = fromVCRect.size.height - initialY
+        
+        fromVCRect.origin.y = doneY
+        fromVCRect.origin.x = (fromVCRect.size.width - toViewWidth) / 2
+        fromVCRect.size.width = toViewWidth
         animatableFromVC.animatableBackgroundView.alpha = 1
+        animatableFromVC.animatableMainView.layer.cornerRadius = 40
+        fromVC.view.frame = fromVCRect
+
+        
         UIView.animate(withDuration: duration, animations: {
             animatableFromVC.animatableMainView.frame = fromVCRect
             animatableFromVC.animatableBackgroundView.alpha = 0
+            animatableFromVC.animatableMainView.layer.cornerRadius = 10
         }) { (_) in
             if !transitionContext.transitionWasCancelled {
                 fromVC.beginAppearanceTransition(false, animated: true)

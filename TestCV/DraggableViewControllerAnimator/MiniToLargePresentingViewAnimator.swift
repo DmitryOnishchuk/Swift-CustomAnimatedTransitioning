@@ -17,12 +17,12 @@ protocol MiniToLargeAnimatable {
 class MiniToLargePresentingViewAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     let duration: TimeInterval
     let initialY: CGFloat
-    let width: CGFloat
-
+    let fromViewWidth: CGFloat
+    
     init(duration: TimeInterval = 0.4, initialY: CGFloat, fromViewWidth:CGFloat) {
         self.duration = duration
         self.initialY = initialY
-        self.width = fromViewWidth
+        self.fromViewWidth = fromViewWidth
     }
     
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
@@ -31,31 +31,30 @@ class MiniToLargePresentingViewAnimator: NSObject, UIViewControllerAnimatedTrans
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         guard let fromVC = transitionContext.viewController(forKey: .from),
-            let toVC = transitionContext.viewController(forKey: .to),
-            let animatableToVC = toVC as? MiniToLargeAnimatable else {
-            return
-        }
+              let toVC = transitionContext.viewController(forKey: .to),
+              let animatableToVC = toVC as? MiniToLargeAnimatable else {
+                  return
+              }
         let fromVCRect = transitionContext.initialFrame(for: fromVC)
         
         var toVCRect = fromVCRect
-       // toVCRect.origin.y = toVCRect.size.height - initialY
         toVCRect.origin.y = initialY
-        toVCRect.origin.x = (toVCRect.size.width - width) / 2
-        toVCRect.size.width = width
+        toVCRect.origin.x = (toVCRect.size.width - fromViewWidth) / 2
+        toVCRect.size.width = fromViewWidth
         animatableToVC.animatableMainView.frame = toVCRect
-        animatableToVC.animatableMainView.layer.cornerRadius = 10
-       toVC.view.frame = fromVCRect
-        
-        
-        
         animatableToVC.animatableBackgroundView.alpha = 0
+        animatableToVC.animatableMainView.layer.cornerRadius = 10
+        toVC.view.frame = fromVCRect
+        
+        
+        
         transitionContext.containerView.addSubview(toVC.view)
         fromVC.beginAppearanceTransition(false, animated: true)
         toVC.beginAppearanceTransition(true, animated: true)
         UIView.animate(withDuration: duration, animations: {
             animatableToVC.animatableMainView.frame = fromVCRect
             animatableToVC.animatableBackgroundView.alpha = 1
-            animatableToVC.animatableMainView.layer.cornerRadius = 0
+            animatableToVC.animatableMainView.layer.cornerRadius = 40
         }) { (_) in
             fromVC.beginAppearanceTransition(transitionContext.transitionWasCancelled, animated: false)
             fromVC.endAppearanceTransition()

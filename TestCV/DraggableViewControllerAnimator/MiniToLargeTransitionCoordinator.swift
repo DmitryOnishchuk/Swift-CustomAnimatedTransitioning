@@ -62,7 +62,8 @@ class MiniToLargeTransitionCoordinator: NSObject, UIViewControllerTransitioningD
     }
     
     func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return MiniToLargeDismissingViewAnimator(initialY: toViewControllerInitialYPosition)
+        return MiniToLargeDismissingViewAnimator(doneY: toViewControllerInitialYPosition,
+                                                 toViewWidth: fromViewControllerGestureView!.bounds.width)
     }
     
     func interactionControllerForPresentation(using animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {

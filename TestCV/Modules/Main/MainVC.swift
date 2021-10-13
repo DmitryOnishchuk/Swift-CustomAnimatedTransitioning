@@ -14,7 +14,7 @@ class MainVC: UIViewController {
         return .lightContent
     }
     
-   // @IBOutlet weak var pageControl: UIPageControl!
+    // @IBOutlet weak var pageControl: UIPageControl!
     @IBOutlet weak var placesCollectionView: UICollectionView!
     @IBOutlet weak var placesCollectionViewHeight: NSLayoutConstraint!
     private let placesCollectionViewCellIdentifier = "PlaceCollectionViewCell"
@@ -63,8 +63,8 @@ class MainVC: UIViewController {
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = cellLineSpaceValue
         layout.itemSize = CGSize(width: cellWidth, height: cellHeight)
-
-       // layout.headerReferenceSize = CGSize(width: cellLineSpaceValue, height: 0)
+        
+        // layout.headerReferenceSize = CGSize(width: cellLineSpaceValue, height: 0)
         //layout.footerReferenceSize = CGSize(width: cellLineSpaceValue, height: 0)
         
         placesCollectionView.collectionViewLayout = layout
@@ -73,6 +73,12 @@ class MainVC: UIViewController {
         let topInset = placesCollectionView.frame.height - cellHeight
         placesCollectionView.contentInset.top = topInset
         placesCollectionView.contentInset.bottom = 0
+        
+        placesCollectionView.performBatchUpdates(nil, completion: {(result) in
+            if !self.places.isEmpty{
+                self.prepareTransition(index: 0)
+            }
+        })
     }
 }
 
@@ -83,27 +89,19 @@ extension MainVC: UICollectionViewDataSource, UICollectionViewDelegate, UICollec
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-       // self.pageControl.numberOfPages = places.count
+        // self.pageControl.numberOfPages = places.count
         return places.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = placesCollectionView.dequeueReusableCell(withReuseIdentifier: placesCollectionViewCellIdentifier, for: indexPath) as! PlaceCollectionViewCell
-       cell.roundCorners(top: true, cornerRadii: 10.0)
+        cell.roundCorners(top: true, cornerRadii: 10.0)
         return cell
     }
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         let pageWidth = Float(cellWidth + cellLineSpaceValue)
         currentPageIndex = Int(floor((Float(scrollView.contentOffset.x) - Float(pageWidth) / 2) / Float(pageWidth)) + 1.0)
-        
-        print(currentPageIndex)
-        let cell = placesCollectionView.cellForItem(at: IndexPath(item: Int(currentPageIndex), section: 0))
-        
-        let tr = MiniToLargeTransitionCoordinator()
-        tr.prepareViewForCustomTransition(fromViewController: self, bottomTriggerView: cell!.contentView, textForDetailVC: "Test")
-        
-        transitions.updateValue(tr, forKey: currentPageIndex)
     }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
@@ -128,6 +126,15 @@ extension MainVC: UICollectionViewDataSource, UICollectionViewDelegate, UICollec
         currentPageIndex = Int(newPage)
         let point = CGPoint (x: CGFloat(newPage * pageWidth), y: targetContentOffset.pointee.y)
         targetContentOffset.pointee = point
+        prepareTransition(index: currentPageIndex)
+    }
+    
+    func prepareTransition(index: Int){
+        print(index)
+        let cell = placesCollectionView.cellForItem(at: IndexPath(item: Int(index), section: 0))
+        let tr = MiniToLargeTransitionCoordinator()
+        tr.prepareViewForCustomTransition(fromViewController: self, bottomTriggerView: cell!.contentView, textForDetailVC: places[index])
+        transitions.updateValue(tr, forKey: index)
     }
     
 }
